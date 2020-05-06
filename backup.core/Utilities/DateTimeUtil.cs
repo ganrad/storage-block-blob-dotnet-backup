@@ -15,25 +15,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-using backup.core.Models;
-// using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.Azure.Storage.Queue;
 
-namespace backup.core.Interfaces
+namespace backup.core.Utilities
 {
-    public interface IStorageQueueRepository
+    /// <summary>Class to get a formatted date time string</summary>
+    public static class DateTimeUtil
     {
-        /// <summary>
-        /// Returns the BLOB Events
-        /// </summary>
-        /// <returns></returns>
-        Task<IEnumerable<CloudQueueMessage>> GetBLOBEvents();
-
-        /// <summary>
-        /// Deletes the BLOB Events
-        /// </summary>
-        /// <returns></returns>
-        Task DeleteBLOBEventAsync(CloudQueueMessage message);
+        /// <summary>Get extra date time string</summary>
+	public static String GetString { get { return DateTime.Now.ToString("MM-dd-yyyy@HH:mm:ss.fff"); } }	
     }
 }

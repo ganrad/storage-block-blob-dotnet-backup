@@ -15,25 +15,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-using backup.core.Models;
-// using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.Azure.Storage.Queue;
 
-namespace backup.core.Interfaces
+namespace backup.core.Utilities
 {
-    public interface IStorageQueueRepository
+    /// <summary>Class to get current timestamp with enough precision</summary>
+    public static class CurrentMillis
     {
-        /// <summary>
-        /// Returns the BLOB Events
-        /// </summary>
-        /// <returns></returns>
-        Task<IEnumerable<CloudQueueMessage>> GetBLOBEvents();
-
-        /// <summary>
-        /// Deletes the BLOB Events
-        /// </summary>
-        /// <returns></returns>
-        Task DeleteBLOBEventAsync(CloudQueueMessage message);
+	private static readonly DateTime Jan1St1970 = new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        /// <summary>Get extra long current timestamp</summary>
+	public static long Millis { get { return (long)((DateTime.UtcNow - Jan1St1970).TotalMilliseconds); } }	
     }
 }

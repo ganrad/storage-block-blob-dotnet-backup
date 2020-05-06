@@ -14,13 +14,24 @@
 //
 using backup.core.Interfaces;
 using backup.core.Models;
+using backup.core.Utilities; // ID05052020.n
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+// using Microsoft.WindowsAzure.Storage;
+// using Microsoft.WindowsAzure.Storage.Blob;
+// using Azure.Storage.Blobs;
+// using Azure.Storage.Blobs.Models;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.DataMovement;
+// using Microsoft.WindowsAzure.Storage.DataMovement;
+
+/**
+ * NOTES:
+ * ID05052020: gradhakr : Added support for capturing blob updates in storage table
+ *
+*/
 
 namespace backup.core.Implementations
 {
@@ -88,6 +99,8 @@ namespace backup.core.Implementations
                     string destinationContaninerName = dateDetails.year.ToString();
 
                     string destinationBlobName = $"wk{dateDetails.WeekNumber}/dy{(int)dateDetails.DayOfWeek}/{sourceBlockBlob.Container.Name}/{sourceBlockBlob.Name}";
+		    destinationBlobName += "."; // ID05052020.n
+		    destinationBlobName += DateTimeUtil.GetString; // ID05052020.n
 
                     CloudBlobContainer destinationContainer = destinationBlobClient.GetContainerReference(destinationContaninerName);
 
@@ -112,7 +125,8 @@ namespace backup.core.Implementations
 
                         copyResult = "SYNCCOPY";
 
-                        await TransferManager.CopyAsync(sourceBlockBlob, destinationBlob, false);
+                        // await TransferManager.CopyAsync(sourceBlockBlob, destinationBlob, false); ID05052020.o
+			await destinationBlob.StartCopyAsync(sourceBlockBlob); // ID05052020.n
                     }
                    
                     destinationBlobInfo = new DestinationBlobInfo();
@@ -181,6 +195,7 @@ namespace backup.core.Implementations
                     await destinationContainer.CreateIfNotExistsAsync();
 
                     CloudBlockBlob destinationBlob = destinationContainer.GetBlockBlobReference(backupBlob.OrgBlobName);
+		    Console.WriteLine($"Target container :{destinationBlob.Container.Name}; blob:{destinationBlob.Name}");
 
                     string copyResult = string.Empty;
 
@@ -199,7 +214,8 @@ namespace backup.core.Implementations
 
                         copyResult = "SYNCCOPY";
 
-                        await TransferManager.CopyAsync(sourceBlockBlob, destinationBlob, false);
+                        // await TransferManager.CopyAsync(sourceBlockBlob, destinationBlob, false); ID05052020.o
+			await destinationBlob.StartCopyAsync(sourceBlockBlob); // ID05052020.n
                     }
 
                     _logger.LogInformation($"Copy Scheduled. Source Blob Name: {backupBlob.BlobName} Destination Blob Name: {backupBlob.OrgBlobName} Copy Id {copyResult}.");

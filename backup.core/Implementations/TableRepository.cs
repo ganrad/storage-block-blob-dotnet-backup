@@ -16,12 +16,18 @@ using backup.core.Interfaces;
 using backup.core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+// using Microsoft.WindowsAzure.Storage; ID05052020.o
+// using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table; // ID05052020.n
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+/**
+ * NOTES:
+ * ID05052020 : gradhakr : Updated code to use Azure Cosmos v1.0.x .NET API
+ */
 
 namespace backup.core.Implementations
 {

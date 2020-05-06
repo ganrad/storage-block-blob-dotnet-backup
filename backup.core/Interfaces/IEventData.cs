@@ -12,11 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+// using Microsoft.WindowsAzure.Storage;
+// using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage; // ID05052020.n
+using Microsoft.Azure.Cosmos.Table; // ID05052020.n
 using System;
 using System.Collections.Generic;
 using System.Text;
+
+/**
+ * ID05052020 : gradhakr : Updated code to use Azure Cosmos v1.0.x .NET API
+ */
 
 namespace backup.core.Interfaces
 {

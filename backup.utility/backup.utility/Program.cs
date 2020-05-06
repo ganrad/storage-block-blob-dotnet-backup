@@ -18,7 +18,8 @@ using backup.core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
+// using Microsoft.WindowsAzure.Storage; ID05052020.o
+// using Microsoft.Azure.Storage; ID05052020.o
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,11 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
+
+/**
+ * NOTES:
+ * ID05052020 : gradhakr : Updated code to use Azure Storage v11.x .NET API
+ */
 
 namespace backup.utility
 {

@@ -16,11 +16,17 @@ using backup.core.Interfaces;
 using backup.core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Queue;
+// using Microsoft.WindowsAzure.Storage.Queue; ID05052020.o
+using Microsoft.Azure.Storage.Queue; // ID05052020.n
 using System;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+
+/**
+ * NOTES:
+ * ID05052020 : gradhakr : Updated code to use Azure Storage v11 .NET API
+ */
 
 namespace backup.core.Implementations
 {
