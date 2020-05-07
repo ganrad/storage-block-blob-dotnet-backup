@@ -17,7 +17,7 @@ using backup.core.Models;
 using backup.core.Utilities; // ID05052020.n
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-// using Microsoft.WindowsAzure.Storage;
+// using Microsoft.WindowsAzure.Storage; ID05052020.o
 // using Microsoft.WindowsAzure.Storage.Blob;
 // using Azure.Storage.Blobs;
 // using Azure.Storage.Blobs.Models;
@@ -29,7 +29,8 @@ using System.Threading.Tasks;
 
 /**
  * NOTES:
- * ID05052020: gradhakr : Added support for capturing blob updates in storage table
+ * ID05052020: gradhakr : Added support for capturing blob updates in storage table. Also, updated the storage copy
+ * function to use v12 .NET API.
  *
 */
 
@@ -195,7 +196,7 @@ namespace backup.core.Implementations
                     await destinationContainer.CreateIfNotExistsAsync();
 
                     CloudBlockBlob destinationBlob = destinationContainer.GetBlockBlobReference(backupBlob.OrgBlobName);
-		    Console.WriteLine($"Target container :{destinationBlob.Container.Name}; blob:{destinationBlob.Name}");
+		    // Console.WriteLine($"Target container :{destinationBlob.Container.Name}; blob:{destinationBlob.Name}");
 
                     string copyResult = string.Empty;
 
