@@ -18,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 // using Microsoft.WindowsAzure.Storage; ID05052020.o
-using Microsoft.Azure.Storage; // ID05052020.n
+// using Microsoft.Azure.Storage; ID05052020.o
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -133,11 +133,11 @@ namespace restore.utility
         private static void ConfigureServices(IServiceCollection serviceCollection)
         {
             // add logging
-            serviceCollection.AddSingleton(new LoggerFactory()
-            .AddConsole()
-            .AddSerilog());
+            // serviceCollection.AddSingleton(new LoggerFactory()
+            // .AddConsole()
+            // .AddSerilog());
 
-            serviceCollection.AddLogging();
+            // serviceCollection.AddLogging();
 
             // Build configuration
             var configuration = new ConfigurationBuilder()
@@ -149,6 +149,10 @@ namespace restore.utility
               .ReadFrom.Configuration(configuration)
               .CreateLogger();
 
+	    serviceCollection.AddLogging(opt => {
+	      opt.AddConsole();
+	      opt.AddSerilog();
+	    });
 
             // Add access to generic IConfigurationRoot
             serviceCollection.AddSingleton(configuration);

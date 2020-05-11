@@ -114,11 +114,11 @@ namespace backup.utility
         private static void ConfigureServices(IServiceCollection serviceCollection)
         {
             // add logging
-            serviceCollection.AddSingleton(new LoggerFactory()
-            .AddConsole()
-            .AddSerilog());
+            // serviceCollection.AddSingleton(new LoggerFactory()
+            // .AddConsole()
+            // .AddSerilog());
 
-            serviceCollection.AddLogging();
+            // serviceCollection.AddLogging();
 
             // Build configuration
             var configuration = new ConfigurationBuilder()
@@ -127,9 +127,13 @@ namespace backup.utility
                 .Build();
 
             Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .CreateLogger();
+              .ReadFrom.Configuration(configuration)
+              .CreateLogger();
 
+	    serviceCollection.AddLogging(opt => {
+	       opt.AddConsole();
+	       opt.AddSerilog();
+	    });
 
             // Add access to generic IConfigurationRoot
             serviceCollection.AddSingleton(configuration);
