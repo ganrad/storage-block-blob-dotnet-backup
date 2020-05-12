@@ -50,7 +50,11 @@ namespace backup.utility.azfunc
 
 	  // if ( configRoot is IConfigurationRoot ) {
 	  var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            //.SetBasePath(Directory.GetCurrentDirectory())
+	    // var executionContext = builder.Services.BuildServiceProvider()
+	    // .GetService<IOptions<ExecutionContextOptions>>().Value;
+	    // var currentDirectory = executionContext.AppDirectory;
+	    .SetBasePath("/home/site/wwwroot/")
             .AddJsonFile("appsettings.json", false)
             .Build();
 
