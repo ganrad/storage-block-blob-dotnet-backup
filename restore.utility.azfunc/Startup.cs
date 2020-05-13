@@ -43,7 +43,8 @@ namespace restore.utility.azfunc
        public override void Configure(IFunctionsHostBuilder builder)
        {
 	  var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            // .SetBasePath(Directory.GetCurrentDirectory())
+	    .SetBasePath("/home/site/wwwroot/")
             .AddJsonFile("appsettings.json", false)
             .Build();
 
