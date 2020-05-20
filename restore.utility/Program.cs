@@ -14,6 +14,8 @@
 //
 using backup.core.Implementations;
 using backup.core.Interfaces;
+using backup.core.Models;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,7 @@ using System.Threading.Tasks;
  * NOTES:
  * ID05052020 : gradhakr : Updated code to use Azure Storage v11.x .NET API
  * ID05192020 : gradhakr : Updated code to allow users to restore blobs for a single container
+ * ID05202020 : gradhakr : Wrap the 'Restore' process request and response in a JSON object
  */
 
 namespace restore.utility
@@ -121,7 +124,14 @@ namespace restore.utility
 
                 // Run the restore process
                 // await restoreBackup.Run(startDate, endDate); ID05192020.o
-                await restoreBackup.Run(startDate, endDate, containerName); // ID05192020.n
+                // await restoreBackup.Run(startDate, endDate, containerName); // ID05202020.o
+		// ID05202020.sn
+		RestoreReqResponse reqResData = new RestoreReqResponse();
+		reqResData.StDate = startDate;
+		reqResData.EnDate = endDate;
+		reqResData.ContainerName = containerName;
+                await restoreBackup.Run(reqResData);
+		// ID05202020.en
 
                 Console.WriteLine($"Press any key to exit!");
 

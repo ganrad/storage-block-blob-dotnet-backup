@@ -14,6 +14,7 @@
 //
 using backup.core.Implementations;
 using backup.core.Interfaces;
+using backup.core.Models;
 
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -27,6 +28,7 @@ using Microsoft.Extensions.Logging;
 
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -40,6 +42,7 @@ using System.Threading.Tasks;
  *
  * NOTES: Capture updates to the code below.
  * ID05192020: gradhakr: Allow users to restore blobs for a single container (feature request)
+ * ID05202020: gradhakr: Wrap the 'Restore' process request and response in a JSON object
  */
 
 namespace restore.utility.azfunc
@@ -60,19 +63,24 @@ namespace restore.utility.azfunc
 	/// This function exposes an HTTP end-point
 	/// </summary>
 	[FunctionName("PerformRestore")]
-        public async Task<IActionResult> Run(
+        public async Task<ActionResult<RestoreReqResponse>> Run(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "restore/blobs")]
 		HttpRequest req, Microsoft.Extensions.Logging.ILogger log)
         {
 	   log.LogInformation($"PerformRestore: Invoked at: {DateTime.Now}");
+	   Stopwatch stopWatch = new Stopwatch();
+	   stopWatch.Start();
 
 	   string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-	   dynamic reqData = JsonConvert.DeserializeObject(requestBody);
-	   string args0 = reqData?.startDate;
-	   string args1 = reqData?.endDate;
+	   RestoreReqResponse reqRespData = JsonConvert.DeserializeObject<RestoreReqResponse>(requestBody);
 
-           if ( (args0 == null) || (args1 == null) )
-	      return new BadRequestObjectResult("Request is missing JSON payload containing start and end dates!");
+           if ( String.IsNullOrEmpty(reqRespData.StartDate) || String.IsNullOrEmpty(reqRespData.EndDate) ) {
+	      reqRespData.ExceptionMessage = "Request is missing JSON payload containing start and end dates!";
+	      stopWatch.Stop();
+	      reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
+
+	      return reqRespData;
+	   };
 
            DateTime startDate = DateTime.MinValue;
            DateTime endDate = DateTime.MinValue;
@@ -80,36 +88,71 @@ namespace restore.utility.azfunc
            bool startDateParsed = false;
            bool endDateParsed = false;
 
-           startDateParsed = DateTime.TryParse(args0, out startDate);
-           endDateParsed = DateTime.TryParse(args1, out endDate);
+           startDateParsed = DateTime.TryParse(reqRespData.StartDate, out startDate);
+           endDateParsed = DateTime.TryParse(reqRespData.EndDate, out endDate);
 
-           if (!startDateParsed || !endDateParsed)
-              return new BadRequestObjectResult($"Unable to parse start and end dates. Provide dates in mm/dd/yyyy format. Start date value {args0} End date value {args1}. ");
+           if (!startDateParsed || !endDateParsed) {
+	      reqRespData.ExceptionMessage = $"Unable to parse start and end dates. Provide dates in mm/dd/yyyy format. Start date value {reqRespData.StartDate} End date value {reqRespData.EndDate}. ";
+	      stopWatch.Stop();
+	      reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
+
+	      return reqRespData;
+	   };
 
 
-           if (startDate > endDate)
-              return new BadRequestObjectResult("Start date cannot be greater than end date.");
+           if (startDate > endDate) {
+              reqRespData.ExceptionMessage = "Start date cannot be greater than end date.";
+	      stopWatch.Stop();
+	      reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
+
+	      return reqRespData;
+	   };
 
            log.LogInformation($"PerformRestore: Start date : {startDate.ToString("MM/dd/yyyy")}, End date {endDate.ToString("MM/dd/yyyy")}. Proceeding with restore process ...");
 
+	   reqRespData.StDate = startDate;
+	   reqRespData.EnDate = endDate;
+
 	   // ID05192020.sn
-	   string containerName = reqData?.containerName;
-	   if ( ! String.IsNullOrEmpty(containerName) )
-              log.LogInformation($"PerformRestore: Container Name : {containerName}");
+	   if ( ! String.IsNullOrEmpty(reqRespData.ContainerName) )
+              log.LogInformation($"PerformRestore: Container Name : {reqRespData.ContainerName}");
+
+	   if ( ! String.IsNullOrEmpty(reqRespData.BlobName) ) {
+	      if ( String.IsNullOrEmpty(reqRespData.ContainerName) ) {
+	         reqRespData.ExceptionMessage = $"To restore File : {reqRespData.BlobName}, container name is required!";
+		 stopWatch.Stop();
+		 reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
+
+		 return reqRespData;
+	      };
+	   };
 	   // ID05192020.en 
 	   
 	   try
 	   {
-                // Run the restore process
-                await _restoreBackup.Run(startDate, endDate, containerName);
-            }
-            catch(Exception ex)
-            {
-                log.LogError($"PerformRestore: Exception occurred. Exception: {@ex.ToString()}");
-            }
-	    log.LogInformation($"PerformRestore: Completed execution at: {DateTime.Now}");
+              // Run the restore process
+              await _restoreBackup.Run(reqRespData);
+           }
+           catch(Exception ex)
+           {
+              log.LogError($"PerformRestore: Exception occurred. Exception: {@ex.ToString()}");
+	      reqRespData.ExceptionMessage = $"Encountered exception : {@ex.ToString()}";
+	      stopWatch.Stop();
+	      reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
 
-	    return (ActionResult) new OkObjectResult("Restore process finished OK");
+	      return reqRespData;
+           }
+	   log.LogInformation($"PerformRestore: Completed execution at: {DateTime.Now}");
+
+	   stopWatch.Stop();
+	   reqRespData.ExecutionTime = getTimeString(stopWatch.Elapsed);
+	   // return (ActionResult) new OkObjectResult("Restore process finished OK"); ID05202020.o
+	   return reqRespData; // ID05202020.n
         }
+
+	private string getTimeString(TimeSpan ts) {
+	  return ( String.Format("{0:00}:{1:00}:{2:00}.{3:00}",ts.Hours, ts.Minutes, ts.Seconds,
+	    ts.Milliseconds / 10) );
+	}
     }
 }

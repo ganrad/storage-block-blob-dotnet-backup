@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 // using Microsoft.WindowsAzure.Storage.Queue; ID05052020.o
 using Microsoft.Azure.Storage.Queue; // ID05052020.n
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ using System.Collections.Generic;
  * NOTES:
  * ID05052020 : gradhakr : Updated code to use Azure Storage v11 .NET API
  * ID05192020 : gradhakr : Updated code to allow restoring blobs only for a single container
+ * ID05202020 : gradhakr : Use the request/response container. Restore a single blob in a container.  Skip blob deletes.
  */
 
 namespace backup.core.Implementations
@@ -43,6 +45,11 @@ namespace backup.core.Implementations
         private readonly IStorageRepository _storageRepository;
 
         private readonly IBlobRepository _blobRepository;
+
+	// ID05202020.sn
+	private const string Yes = "YES";
+	private const string No = "NO";
+	// ID05202020.en
 
         /// <summary>
         /// Storage back up
@@ -65,17 +72,19 @@ namespace backup.core.Implementations
 
         /// <summary>
         /// Run method
-        /// 1: Reads the messgaes from the table storage in ascending order.
+        /// 1: Reads the messages from the table storage in ascending order.
         /// 2: Peform the delete or create operation on the destination blob.
         /// </summary>
         /// <returns></returns>
-        public async Task Run(DateTime startDate, DateTime endDate, String contName)
+        // public async Task Run(DateTime startDate, DateTime endDate, String contName) ID05202020.o
+        public async Task Run(RestoreReqResponse reqResponse) // ID05202020.n
         {
             _logger.LogDebug("Inside RestoreBackupWorker.Run");
 
             //Since there can be many records around 84K for a day, let's read the records day by day and perform the restore operation
 
-            List<Tuple<int,int, DateTime>> dates = GetDatesForDateRange(startDate, endDate);
+            // List<Tuple<int,int, DateTime>> dates = GetDatesForDateRange(startDate, endDate); ID05202020.o
+            List<Tuple<int,int, DateTime>> dates = GetDatesForDateRange(reqResponse.StDate, reqResponse.EnDate); // ID05202020.n
 
             _logger.LogInformation($"Number of dates determined.---{dates.Count()}");
 
@@ -106,9 +115,12 @@ namespace backup.core.Implementations
                                     _logger.LogInformation($"Going to perform copy as it is a created event {createdBlob.data.url}");
 
 				    // ID05192020.sn
-				    if ( (! String.IsNullOrEmpty(contName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, contName)) )
+				    if ( (! String.IsNullOrEmpty(reqResponse.ContainerName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, reqResponse.ContainerName)) ) // ID05202020.n
+				       continue;
+				    if ( (! String.IsNullOrEmpty(reqResponse.BlobName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgBlobName, reqResponse.BlobName)) ) // ID05202020.n
 				       continue;
 				    // ID05192020.en
+				    
                                     await _blobRepository.CopyBlobFromBackupToRestore(eventData.DestinationBlobInfo);
                                 }
                                 else
@@ -123,9 +135,16 @@ namespace backup.core.Implementations
                                 _logger.LogInformation($"Going to delete as it is a deleted event {deletedBlob.data.url}");
 
 				// ID05192020.sn
-				if ( (! String.IsNullOrEmpty(contName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, contName)) ) 
+				if ( (! String.IsNullOrEmpty(reqResponse.ContainerName)) && (! deletedBlob.data.url.Contains(reqResponse.ContainerName)) ) // ID05202020.n
+				   continue;
+
+				if ( (! String.IsNullOrEmpty(reqResponse.BlobName)) && (! deletedBlob.data.url.Contains(reqResponse.BlobName)) ) // ID05202020.n
+				   continue;
+
+				if ( reqResponse.SkipDeletes.ToUpper(new CultureInfo("en-US",false)).Equals(Yes) ) // ID05202020.n
 				   continue;
 				// ID05192020.en
+				
                                 await _blobRepository.DeleteBlobFromRestore(eventData.RecievedEventData);
                             }
                             else
@@ -145,6 +164,8 @@ namespace backup.core.Implementations
             }
 
             _logger.LogInformation($" Restore Success records count {totalSuccessCount}. Restore Failure records count {totalFailureCount}.");
+	    reqResponse.TotalSuccessCount = totalSuccessCount;
+	    reqResponse.TotalFailureCount = totalFailureCount;
 
             _logger.LogDebug("Completed RestoreBackupWorker.Run");
         }

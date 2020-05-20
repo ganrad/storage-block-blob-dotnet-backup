@@ -17,9 +17,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+using backup.core.Models; // ID05202020.n
+
 /**
  * NOTES:
- * ID05192020: gradhakr : Updated code to allow users to restore blobs for a single container
+ * ID05202020: gradhakr : Wrap the restore process request and response in a JSON object
  */
 
 namespace backup.core.Interfaces
@@ -32,11 +34,9 @@ namespace backup.core.Interfaces
         /// <summary>
         /// Run
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-	/// <param name="contName"></param>
+        /// <param name="reqResponse"></param>
         /// <returns></returns>
-        // Task Run(DateTime startDate, DateTime endDate); ID05192020.o
-        Task Run(DateTime startDate, DateTime endDate, String contName); // ID05192020.n
+        // Task Run(DateTime startDate, DateTime endDate); ID05202020.o
+        Task Run(RestoreReqResponse reqResponse); // ID05202020.n
     }
 }
