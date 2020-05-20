@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 /**
  * NOTES:
  * ID05052020: gradhakr : Added support for capturing blob updates in storage table. Also, updated the storage copy
- * function to use v12 .NET API.
+ * function to use v11 .NET API.
  *
 */
 

@@ -17,6 +17,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+/**
+ * NOTES:
+ * ID05192020: gradhakr : Updated code to allow users to restore blobs for a single container
+ */
+
 namespace backup.core.Interfaces
 {
     /// <summary>
@@ -29,7 +34,9 @@ namespace backup.core.Interfaces
         /// </summary>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
+	/// <param name="contName"></param>
         /// <returns></returns>
-        Task Run(DateTime startDate, DateTime endDate);
+        // Task Run(DateTime startDate, DateTime endDate); ID05192020.o
+        Task Run(DateTime startDate, DateTime endDate, String contName); // ID05192020.n
     }
 }

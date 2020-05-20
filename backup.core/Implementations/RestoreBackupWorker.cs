@@ -26,6 +26,7 @@ using System.Collections.Generic;
 /**
  * NOTES:
  * ID05052020 : gradhakr : Updated code to use Azure Storage v11 .NET API
+ * ID05192020 : gradhakr : Updated code to allow restoring blobs only for a single container
  */
 
 namespace backup.core.Implementations
@@ -68,7 +69,7 @@ namespace backup.core.Implementations
         /// 2: Peform the delete or create operation on the destination blob.
         /// </summary>
         /// <returns></returns>
-        public async Task Run(DateTime startDate, DateTime endDate)
+        public async Task Run(DateTime startDate, DateTime endDate, String contName)
         {
             _logger.LogDebug("Inside RestoreBackupWorker.Run");
 
@@ -104,6 +105,10 @@ namespace backup.core.Implementations
                                 {
                                     _logger.LogInformation($"Going to perform copy as it is a created event {createdBlob.data.url}");
 
+				    // ID05192020.sn
+				    if ( (! String.IsNullOrEmpty(contName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, contName)) )
+				       continue;
+				    // ID05192020.en
                                     await _blobRepository.CopyBlobFromBackupToRestore(eventData.DestinationBlobInfo);
                                 }
                                 else
@@ -117,6 +122,10 @@ namespace backup.core.Implementations
 
                                 _logger.LogInformation($"Going to delete as it is a deleted event {deletedBlob.data.url}");
 
+				// ID05192020.sn
+				if ( (! String.IsNullOrEmpty(contName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, contName)) ) 
+				   continue;
+				// ID05192020.en
                                 await _blobRepository.DeleteBlobFromRestore(eventData.RecievedEventData);
                             }
                             else

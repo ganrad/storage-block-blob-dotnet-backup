@@ -39,6 +39,7 @@ using System.Threading.Tasks;
  * Dated: 05-07-2020
  *
  * NOTES: Capture updates to the code below.
+ * ID05192020: gradhakr: Allow users to restore blobs for a single container (feature request)
  */
 
 namespace restore.utility.azfunc
@@ -91,10 +92,16 @@ namespace restore.utility.azfunc
 
            log.LogInformation($"PerformRestore: Start date : {startDate.ToString("MM/dd/yyyy")}, End date {endDate.ToString("MM/dd/yyyy")}. Proceeding with restore process ...");
 
+	   // ID05192020.sn
+	   string containerName = reqData?.containerName;
+	   if ( ! String.IsNullOrEmpty(containerName) )
+              log.LogInformation($"PerformRestore: Container Name : {containerName}");
+	   // ID05192020.en 
+	   
 	   try
 	   {
                 // Run the restore process
-                await _restoreBackup.Run(startDate, endDate);
+                await _restoreBackup.Run(startDate, endDate, containerName);
             }
             catch(Exception ex)
             {

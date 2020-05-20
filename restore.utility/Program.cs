@@ -24,7 +24,9 @@ using System;
 using System.Threading.Tasks;
 
 /**
+ * NOTES:
  * ID05052020 : gradhakr : Updated code to use Azure Storage v11.x .NET API
+ * ID05192020 : gradhakr : Updated code to allow users to restore blobs for a single container
  */
 
 namespace restore.utility
@@ -58,12 +60,12 @@ namespace restore.utility
 
                 bool endDateParsed = false;
 
-                if (args.Length == 2)
-                {
+                // if (args.Length == 2) ID05192020.o
+                // {
                     startDateParsed = DateTime.TryParse(args[0], out startDate);
 
                     endDateParsed = DateTime.TryParse(args[1], out endDate);
-                }
+                // }
 
                 if (!startDateParsed || !endDateParsed)
                 {
@@ -83,7 +85,10 @@ namespace restore.utility
                     return;
                 }
 
-                Console.WriteLine($"Here are the captured values. Start date : {startDate.ToString("MM/dd/yyyy")} End date {endDate.ToString("MM/dd/yyyy")}.");
+		string containerName = (args.Length > 2) ? args[2] : null; // ID05192020.n
+
+                // Console.WriteLine($"Here are the captured values. Start date : {startDate.ToString("MM/dd/yyyy")} End date {endDate.ToString("MM/dd/yyyy")}."); ID05192020.o
+                Console.WriteLine($"Here are the captured values. Start date : {startDate.ToString("MM/dd/yyyy")} End date : {endDate.ToString("MM/dd/yyyy")}. Container Name : {containerName}"); // ID05192020.n
 
                 Console.WriteLine($"Please enter \"Y\" to continue performing the restore'");
 
@@ -95,6 +100,7 @@ namespace restore.utility
 
                     Console.ReadKey();
 
+		    return;
                 }
 
                 //to do start the restore process.
@@ -114,7 +120,8 @@ namespace restore.utility
                 IRestoreBackup restoreBackup = _serviceProvider.GetService<IRestoreBackup>();
 
                 // Run the restore process
-                await restoreBackup.Run(startDate, endDate);
+                // await restoreBackup.Run(startDate, endDate); ID05192020.o
+                await restoreBackup.Run(startDate, endDate, containerName); // ID05192020.n
 
                 Console.WriteLine($"Press any key to exit!");
 
