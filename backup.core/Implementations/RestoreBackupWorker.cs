@@ -135,13 +135,13 @@ namespace backup.core.Implementations
                                 _logger.LogInformation($"Going to delete as it is a deleted event {deletedBlob.data.url}");
 
 				// ID05192020.sn
+				if ( reqResponse.SkipDeletes.ToUpper(new CultureInfo("en-US",false)).Equals(Yes) ) // ID05202020.n
+				   continue;
+
 				if ( (! String.IsNullOrEmpty(reqResponse.ContainerName)) && (! deletedBlob.data.url.Contains(reqResponse.ContainerName)) ) // ID05202020.n
 				   continue;
 
 				if ( (! String.IsNullOrEmpty(reqResponse.BlobName)) && (! deletedBlob.data.url.Contains(reqResponse.BlobName)) ) // ID05202020.n
-				   continue;
-
-				if ( reqResponse.SkipDeletes.ToUpper(new CultureInfo("en-US",false)).Equals(Yes) ) // ID05202020.n
 				   continue;
 				// ID05192020.en
 				
