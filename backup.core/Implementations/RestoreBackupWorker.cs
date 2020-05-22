@@ -112,13 +112,15 @@ namespace backup.core.Implementations
 
                                 if (eventData.DestinationBlobInfo != null)
                                 {
-                                    _logger.LogInformation($"Going to perform copy as it is a created event {createdBlob.data.url}");
-
 				    // ID05192020.sn
 				    if ( (! String.IsNullOrEmpty(reqResponse.ContainerName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgContainerName, reqResponse.ContainerName)) ) // ID05202020.n
 				       continue;
 				    if ( (! String.IsNullOrEmpty(reqResponse.BlobName)) && (! String.Equals(eventData.DestinationBlobInfo.OrgBlobName, reqResponse.BlobName)) ) // ID05202020.n
 				       continue;
+				    
+				    _logger.LogDebug($"I/U Orig. Container:{eventData.DestinationBlobInfo.OrgContainerName},Req. Container:{reqResponse.ContainerName}");
+				    _logger.LogDebug($"I/U Orig. Blob:{eventData.DestinationBlobInfo.OrgBlobName},Req. Blob:{reqResponse.BlobName}");
+                                    _logger.LogInformation($"Going to perform copy as it is a created event {createdBlob.data.url}");
 				    // ID05192020.en
 				    
                                     await _blobRepository.CopyBlobFromBackupToRestore(eventData.DestinationBlobInfo);
@@ -126,13 +128,12 @@ namespace backup.core.Implementations
                                 else
                                 {
                                     _logger.LogInformation($"Copy of the blob will be ignored as at the time of backup the blob was not present at source. One of the cause can be , a delete has been performed already on this blob. {createdBlob.data.url}");
+				    continue; // ID05202020.n
                                 }
                             }
                             else if (eventData.RecievedEventData is BlobEvent<DeletedEventData>)
                             {
                                 BlobEvent<DeletedEventData> deletedBlob = (BlobEvent<DeletedEventData>)eventData.RecievedEventData;
-
-                                _logger.LogInformation($"Going to delete as it is a deleted event {deletedBlob.data.url}");
 
 				// ID05192020.sn
 				if ( reqResponse.SkipDeletes.ToUpper(new CultureInfo("en-US",false)).Equals(Yes) ) // ID05202020.n
@@ -143,6 +144,10 @@ namespace backup.core.Implementations
 
 				if ( (! String.IsNullOrEmpty(reqResponse.BlobName)) && (! deletedBlob.data.url.Contains(reqResponse.BlobName)) ) // ID05202020.n
 				   continue;
+				
+				_logger.LogDebug($"D Req. Container:{reqResponse.ContainerName}");
+				_logger.LogDebug($"D Req. Blob:{reqResponse.BlobName}");
+                                _logger.LogInformation($"Going to delete as it is a deleted event {deletedBlob.data.url}");
 				// ID05192020.en
 				
                                 await _blobRepository.DeleteBlobFromRestore(eventData.RecievedEventData);
@@ -150,6 +155,7 @@ namespace backup.core.Implementations
                             else
                             {
                                 _logger.LogInformation($"Currently Created and Deleted events are supported. Event Data: {eventData.RecievedEventDataJSON}");
+				continue; // ID05202020.n
                             }
 
                             totalSuccessCount++;
