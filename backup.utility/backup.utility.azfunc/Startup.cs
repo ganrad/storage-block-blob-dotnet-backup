@@ -59,7 +59,7 @@ namespace backup.utility.azfunc
             .Build();
 
           var logger = new LoggerConfiguration()
-	    // .WriteTo.Console()
+	    .WriteTo.Console()
             .ReadFrom.Configuration(configuration)
             .CreateLogger();
 
