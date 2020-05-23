@@ -57,6 +57,7 @@ namespace restore.utility.azfunc
 	  builder.Services.AddLogging();
 	    
           // Add access to generic IConfigurationRoot
+	  // builder.Services.AddSingleton<Serilog.ILogger>(logger);
           builder.Services.AddSingleton(configuration);
 
           // Add services

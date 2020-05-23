@@ -122,7 +122,7 @@ namespace backup.core.Implementations
                     }
                     else
                     {
-                        _logger.LogInformation($"About to sync copy {sourceBlockBlob.Name}. Blob size {sourceBlockBlob.Properties.Length} bytes");
+                        _logger.LogInformation($"About to sync copy from Container: {sourceBlockBlob.Container.Name}, Blob: {sourceBlockBlob.Name}. Blob size: {sourceBlockBlob.Properties.Length} bytes");
 
                         copyResult = "SYNCCOPY";
 
@@ -211,7 +211,7 @@ namespace backup.core.Implementations
                     }
                     else
                     {
-                        _logger.LogInformation($"About to sync copy {sourceBlockBlob.Name}. Blob size {sourceBlockBlob.Properties.Length} bytes");
+                        _logger.LogInformation($"About to sync copy from Container: {sourceBlockBlob.Container.Name}, Blob: {sourceBlockBlob.Name}. Blob size: {sourceBlockBlob.Properties.Length} bytes");
 
                         copyResult = "SYNCCOPY";
 
